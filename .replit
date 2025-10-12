@@ -13,7 +13,4 @@ command = "static-web-server --root . --host 0.0.0.0 --port $PORT --spa index.ht
 [[ports]]
 localPort = 5000
 externalPort = 5000
-
-[[ports]]
-localPort = 44623
-externalPort = 80
+portType = "http"
