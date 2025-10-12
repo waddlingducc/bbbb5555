@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>NebulaPlay</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@800&display=swap" rel="stylesheet"/>
+
+<!-- Unity build assets (UNCHANGED) -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/n-101-1/1@main/style.css"/>
+<script src="https://cdn.jsdelivr.net/gh/n-101-1/1@main/UnityProgress.js"></script>
+<script src="https://cdn.jsdelivr.net/gh/n-101-1/1@main/2.7.js"></script>
+
+<style>
+  html, body {
+    margin: 0; padding: 0; height: 100%;
+    overflow: hidden;
+    background: black url(/images/colour-dark-grey-mz-vf.jpg) center center / cover no-repeat fixed;
+  }
+
+  /* Top bar (unchanged look) */
+  nav {
+    position: fixed; top: 0; left: 0;
+    width: 100%; height: 7vw;
+    display: flex; align-items: center;
+    backdrop-filter: blur(10px) saturate(200%) brightness(70%);
+    padding: 0 1%;
+    z-index: 10;
+  }
+  nav img {
+    width: 95px; height: auto; margin-right: 1%;
+    border-radius: 1vw;
+  }
+  nav h3 {
+    font-size: 4vw; font-weight: 800; color: #fff;
+    font-family: 'Montserrat', sans-serif;
+  }
+
+  /* Below the nav: game area */
+  .content {
+    position: fixed; top: 7vw; left: 0; right: 0; bottom: 0;
+    display: flex; gap: 20px; align-items: stretch;
+    padding: 0 16px 16px 16px;
+    box-sizing: border-box;
+    margin-right: 300px; /* reserve lane so game never runs under the floating ad */
+  }
+
+  .game-wrap {
+    flex: 1 1 auto;
+    display: flex; align-items: stretch; justify-content: center;
+    min-width: 0;
+    position: relative;
+    background: #000;
+    border-radius: 8px;
+    overflow: hidden;
+  }
+
+  /* Unity injects its <canvas> into this div */
+  #gameContainer { width: 100%; height: 100%; margin: 0; }
+
+  /* Floating right ad — hovers above nav */
+  .side-ad {
+    position: fixed;
+    top: 0; right: 0;
+    width: 300px; height: 600px;
+    z-index: 9999;       /* above nav & game */
+    display: flex; align-items: center; justify-content: center;
+    border-radius: 8px; overflow: hidden;
+    backdrop-filter: blur(6px) saturate(140%) brightness(85%);
+  }
+  .side-ad ins.adsbygoogle {
+    display: inline-block !important;
+    width: 300px !important;
+    height: 600px !important;
+  }
+</style>
+
+<!-- Google Publisher Tag (GAM) -->
+<script async src="https://securepubads.g.doubleclick.net/tag/js/gpt.js"></script>
+<script>
+  // ------------ Refresh-config you can tweak -------------
+  const SLOT_PATH      = '/23289777950/300x600';
+  const SLOT_SIZE      = [300, 600];
+  const SLOT_DIV_ID    = 'div-gpt-ad-1757794050642-0';
+  const INTERVAL_MS    = 30000; // 30s
+  const MAX_REFRESHES  = 6;
+  const MIN_VIEW_MS_BEFORE_REFRESH = 5000; // be viewable ~5s before refresh
+  // -------------------------------------------------------
+
+  window.googletag = window.googletag || { cmd: [] };
+
+  googletag.cmd.push(function() {
+    const slot = googletag.defineSlot(SLOT_PATH, SLOT_SIZE, SLOT_DIV_ID)
+      .addService(googletag.pubads());
+
+    googletag.pubads().enableSingleRequest();
+
+    // Page/tab visibility gate
+    let pageVisible = !document.hidden;
+    document.addEventListener('visibilitychange', () => {
+      pageVisible = !document.hidden;
+    });
+
+    // Viewability + in-view tracking
+    let inView = true;     // refined once IO attaches
+    let viewableSince = 0; // timestamp when it became viewable
+
+    // Fires when 50%+ in view for ~1s
+    googletag.pubads().addEventListener('impressionViewable', (e) => {
+      if (e.slot === slot) {
+        inView = true;
+        viewableSince = performance.now();
+      }
+    });
+
+    // Attach IntersectionObserver after the div exists
+    function attachObserverWhenReady() {
+      const el = document.getElementById(SLOT_DIV_ID);
+      if (!el) { setTimeout(attachObserverWhenReady, 50); return; }
+      if ('IntersectionObserver' in window) {
+        const io = new IntersectionObserver((entries) => {
+          entries.forEach(entry => {
+            inView = entry.isIntersecting && entry.intersectionRatio >= 0.5;
+          });
+        }, { threshold: [0.5] });
+        io.observe(el);
+      } else {
+        inView = true;
+      }
+    }
+    attachObserverWhenReady();
+
+    // Start refresh cycle after first creative loads
+    let refreshes = 0;
+    let refreshTimer = null;
+
+    googletag.pubads().addEventListener('slotOnload', (e) => {
+      if (e.slot !== slot || refreshTimer) return;
+      refreshTimer = setInterval(() => {
+        if (!pageVisible) return;
+        if (!inView) return;
+        if (refreshes >= MAX_REFRESHES) return;
+        if (viewableSince && (performance.now() - viewableSince) < MIN_VIEW_MS_BEFORE_REFRESH) return;
+        googletag.pubads().refresh([slot]); // correlator handled by GPT
+        refreshes++;
+      }, INTERVAL_MS);
+    });
+
+    googletag.enableServices();
+  });
+</script>
+</head>
+<body>
+  <nav>
+    <a class="logo-link" data-href="/" style="cursor:pointer;">
+      <img src="/images/logo.png" alt="logo"/>
+    </a>
+    <script>
+      document.querySelectorAll('.logo-link').forEach(link => {
+        link.addEventListener('click', e => {
+          e.preventDefault();
+          window.location.href = link.dataset.href;
+        });
+      });
+    </script>
+    <h3>1v1.LOL</h3>
+  </nav>
+
+  <div class="content">
+    <!-- Game (UNCHANGED structure) -->
+    <div class="game-wrap">
+      <div id="gameContainer"></div>
+    </div>
+  </div>
+
+  <!-- Floating Right Vertical Ad -->
+  <aside class="side-ad">
+    <!-- /23289777950/300x600 -->
+    <div id="div-gpt-ad-1757794050642-0" style="width:300px;height:600px;"></div>
+    <script>
+      // Ensure the slot div exists before display()
+      (function onReady(fn){
+        if (document.readyState === 'loading') {
+          document.addEventListener('DOMContentLoaded', fn);
+        } else { fn(); }
+      })(function(){
+        googletag = window.googletag || { cmd: [] };
+        googletag.cmd.push(function() {
+          googletag.display('div-gpt-ad-1757794050642-0');
+        });
+      });
+    </script>
+  </aside>
+
+  <!-- Unity instantiate (UNCHANGED) -->
+  <script>
+    var gameInstance;
+    window.onload = function () {
+      gameInstance = UnityLoader.instantiate(
+        "gameContainer",
+        "https://cdn.jsdelivr.net/gh/n-101-1/1@main/2.7.json",
+        {
+          onProgress: UnityProgress,
+          Module: {
+            onRuntimeInitialized: function () {
+              UnityProgress(gameInstance, "complete");
+            }
+          }
+        }
+      );
+    };
+  </script>
+
+  <!-- Pointer lock for Unity (UNCHANGED logic) -->
+  <script>
+    (function () {
+      const container = document.getElementById("gameContainer");
+
+      // Track recent movement keys (W/A/S/D, Space, Shift)
+      const movementKeys = new Set(["KeyW","KeyA","KeyS","KeyD","Space","ShiftLeft","ShiftRight"]);
+      let lastMoveKeyAt = 0;
+      const MOVE_KEY_WINDOW_MS = 1200;
+
+      window.addEventListener("keydown", (e) => {
+        if (movementKeys.has(e.code)) lastMoveKeyAt = performance.now();
+      }, { capture: true });
+
+      function requestLock(canvas) {
+        const lock = canvas.requestPointerLock ||
+                     canvas.mozRequestPointerLock ||
+                     canvas.webkitRequestPointerLock;
+        if (lock) lock.call(canvas);
+      }
+
+      function shouldLock(event) {
+        if (event.button === 1 || event.button === 2) return true;
+        if (event.button === 0) return (performance.now() - lastMoveKeyAt) <= MOVE_KEY_WINDOW_MS;
+        return false;
+      }
+
+      function attach() {
+        const canvas = container.querySelector("canvas");
+        if (!canvas) return false;
+
+        const onPointerDown = (e) => {
+          if (!shouldLock(e)) return;
+          requestLock(canvas);
+        };
+
+        canvas.addEventListener("pointerdown", onPointerDown, { capture: true });
+        container.addEventListener("pointerdown", onPointerDown, { capture: true });
+        canvas.addEventListener("contextmenu", (e) => e.preventDefault());
+        return true;
+      }
+
+      if (!attach()) {
+        const mo = new MutationObserver(() => { if (attach()) mo.disconnect(); });
+        mo.observe(container, { childList: true, subtree: true });
+      }
+    })();
+  </script>
+
+  <!-- Extra Firebase/auth scripts (UNCHANGED) -->
+  <script src="https://cdn.jsdelivr.net/gh/n-101-1/1@main/1firebase-app.js"></script>
+  <script src="https://cdn.jsdelivr.net/gh/n-101-1/1@main/1firebase-auth.js"></script>
+  <script src="https://cdn.jsdelivr.net/gh/n-101-1/1@main/1firebase-firestore.js"></script>
+  <script src="https://cdn.jsdelivr.net/gh/n-101-1/1@main/1firebase.js"></script>
+  <script src="https://cdn.jsdelivr.net/gh/n-101-1/1@main/1login.js?v=2"></script>
+  <script src="https://cdn.jsdelivr.net/gh/n-101-1/1@main/1firestore.js"></script>
+
+  <!-- Ad hook callbacks (UNCHANGED) -->
+  <script>
+    function showAds() { console.log("show ads"); }
+    function requestNewAd() { unityAdFinishedCallback(); }
+    function unityAdFinishedCallback() {
+      try { if (gameInstance) gameInstance.SendMessage("AdsManager", "OnWebCallback"); }
+      catch (error) { console.log(error); }
+    }
+  </script>
+
+  <script>document.addEventListener("contextmenu", e => e.preventDefault());</script>
+</body>
+</html>
