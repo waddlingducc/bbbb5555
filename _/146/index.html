@@ -126,6 +126,7 @@
     };
     const blobUrl = URL.createObjectURL(new Blob([JSON.stringify(json)], { type: "application/json" }));
     window.addEventListener('resize', resizeUnityContainer);
+    setTimeout(function() {
     UnityLoader.instantiate("unityContainer", json, {
       onProgress: UnityProgress,
       url: blobUrl,
@@ -138,6 +139,7 @@
       }
     });
   });
+  }, 2000);
 </script>
 
 <!-- Google Publisher Tag (GAM) -->

@@ -165,7 +165,7 @@ html, body {
 <div class="content">
 <!-- Game -->
 <div class="game-wrap">
-<iframe sandbox="allow-scripts allow-same-origin" src="/storage/Papery Planes.html">
+<iframe sandbox="allow-scripts allow-same-origin" data-delayed-src="/storage/Papery Planes.html">
 <p>Your browser does not support iframes.</p>
 </iframe>
 </div>
@@ -186,5 +186,15 @@ html, body {
       });
     </script>
 </aside>
+
+  <script>
+    // Delay game loading by 2 seconds
+    setTimeout(function() {
+      const gameIframe = document.querySelector('iframe[data-delayed-src]');
+      if (gameIframe) {
+        gameIframe.src = gameIframe.getAttribute('data-delayed-src');
+      }
+    }, 2000);
+  </script>
 </body>
 </html>

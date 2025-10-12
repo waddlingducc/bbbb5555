@@ -155,7 +155,7 @@
 <div class="content">
 <!-- Game -->
 <div class="game-wrap">
-<iframe sandbox="allow-scripts allow-same-origin" src="/storage/Drive Mad.html">
+<iframe sandbox="allow-scripts allow-same-origin" data-delayed-src="/storage/Drive Mad.html">
 <p>Your browser does not support iframes.</p>
 </iframe>
 </div>
@@ -176,6 +176,16 @@
     document.addEventListener("contextmenu", function(e) {
       e.preventDefault();
     });
+  </script>
+
+  <script>
+    // Delay game loading by 2 seconds
+    setTimeout(function() {
+      const gameIframe = document.querySelector('iframe[data-delayed-src]');
+      if (gameIframe) {
+        gameIframe.src = gameIframe.getAttribute('data-delayed-src');
+      }
+    }, 2000);
   </script>
 </body>
 </html>

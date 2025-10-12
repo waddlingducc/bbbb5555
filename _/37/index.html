@@ -386,12 +386,14 @@
     const script = document.createElement("script");
     script.src = loaderUrl;
     script.onload = () => {
+      setTimeout(function() {
       createUnityInstance(canvas, config, (progress) => {
         progressBarFull.style.width = (100 * progress) + "%";
       }).then((unityInstance) => {
         myGameInstance = unityInstance;
         setTimeout(() => { loadingBar.style.display = "none"; }, 500);
         canvas.addEventListener('pointerdown', showAdOnClick, { once: true });
+    }, 2000);
         canvas.addEventListener('touchstart', showAdOnClick, { once: true });
         setupPointerLockTripleClick();
       }).catch((message) => {

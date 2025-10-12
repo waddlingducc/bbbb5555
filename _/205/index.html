@@ -162,7 +162,7 @@
     <div class="game-wrap">
       <iframe
         id="gameframe"
-        src="/storage/clironsnout.html"
+        data-delayed-src="/storage/clironsnout.html"
         tabindex="0"
         sandbox="allow-scripts allow-same-origin allow-pointer-lock allow-forms allow-popups allow-modals"
         allow="fullscreen; autoplay; clipboard-read; clipboard-write; gamepad; xr-spatial-tracking; picture-in-picture"
@@ -234,6 +234,16 @@
       window.addEventListener('resize', resizeGuard);
       resizeGuard();
     })();
+  </script>
+
+  <script>
+    // Delay game loading by 2 seconds
+    setTimeout(function() {
+      const gameIframe = document.querySelector('iframe[data-delayed-src]');
+      if (gameIframe) {
+        gameIframe.src = gameIframe.getAttribute('data-delayed-src');
+      }
+    }, 2000);
   </script>
 </body>
 </html>

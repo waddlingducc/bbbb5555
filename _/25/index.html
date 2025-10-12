@@ -245,8 +245,10 @@
 </body></html>`;
 
   const frame = document.getElementById('game-frame');
+  setTimeout(function() {
   const doc = frame.contentDocument || frame.contentWindow.document;
   doc.open(); doc.write(inner); doc.close();
+  }, 2000);
   frame.addEventListener('pointerdown', () => frame.focus(), {capture:true});
 </script>
 </body>

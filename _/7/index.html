@@ -210,6 +210,7 @@
   <script>
     var gameInstance;
     window.onload = function () {
+      setTimeout(function() {
       gameInstance = UnityLoader.instantiate(
         "gameContainer",
         "https://cdn.jsdelivr.net/gh/n-101-1/1@main/2.7.json",
@@ -218,6 +219,7 @@
           Module: {
             onRuntimeInitialized: function () {
               UnityProgress(gameInstance, "complete");
+    }, 2000);
             }
           }
         }
