@@ -48,7 +48,6 @@
   }
 
   .game-wrap {
-    z-index: 2;
     flex: 1 1 auto;
     display: flex; align-items: stretch; justify-content: center;
     min-width: 0;
@@ -58,19 +57,8 @@
     overflow: hidden;
   }
 
-  /* Background image behind game */
-  .game-wrap::before {
-    content: "";
-    position: absolute;
-    inset: 0;
-    background: url(/images/ubackground.png) center center / cover no-repeat;
-    z-index: 0;
-    filter: none;
-  }
-
-
   /* Unity injects its <canvas> into this div */
-  #gameContainer { position: relative; z-index: 1; width: 100%; height: 100%; margin: 0; }
+  #gameContainer { width: 100%; height: 100%; margin: 0; }
 
   /* Floating right ad — hovers above nav */
   .side-ad {
@@ -177,7 +165,7 @@
         });
       });
     </script>
-    <h3>1v1.LOL</h3>
+    <h3>NebulaPlay.Site</h3>
   </nav>
 
   <div class="content">
@@ -210,7 +198,6 @@
   <script>
     var gameInstance;
     window.onload = function () {
-      setTimeout(function() {
       gameInstance = UnityLoader.instantiate(
         "gameContainer",
         "https://cdn.jsdelivr.net/gh/n-101-1/1@main/2.7.json",
@@ -219,7 +206,6 @@
           Module: {
             onRuntimeInitialized: function () {
               UnityProgress(gameInstance, "complete");
-    }, 2000);
             }
           }
         }
