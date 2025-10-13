@@ -16,6 +16,10 @@ command = ["static-web-server", "--root", ".", "--host", "0.0.0.0", "--port", "$
 localPort = 5000
 externalPort = 5000
 
+[[ports]]
+localPort = 38145
+externalPort = 80
+
 [agent]
 expertMode = true
 
