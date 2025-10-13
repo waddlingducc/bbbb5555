@@ -11,7 +11,9 @@
     margin: 0;
     padding: 0;
     background: black url(/images/colour-dark-grey-mz-vf.jpg) center center / cover no-repeat fixed;
-    overflow-x: hidden; /* no horizontal scrollbar */
+    overflow-x: hidden;
+    overflow-y: auto;
+    min-height: 100vh;
   }
 
   /* Top bar (locked at top) */
@@ -44,8 +46,10 @@
   .content {
     margin-top: 7vw;              /* offset for fixed nav bar */
     padding: 2vh 16px 16px 16px;
+    padding-bottom: 4vh;
     box-sizing: border-box;
     margin-right: 300px;          /* reserve space so game never goes under ad */
+    min-height: calc(100vh + 10vh);
   }
   .game-wrap {
     position: relative;
