@@ -2,410 +2,187 @@
 <html lang="en">
 <head>
 <meta charset="utf-8"/>
-<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>NebulaPlay</title>
-
-<!-- Keep Granny 2 assets’ stylesheet & favicon -->
-<link rel="shortcut icon" href="https://cdn.jsdelivr.net/gh/forms-docs-slides-glgl/ngng@main/TemplateData/favicon.ico"/>
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/forms-docs-slides-glgl/ngng@main/TemplateData/styles.css"/>
-
-<!-- NebulaPlay font -->
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@800&display=swap" rel="stylesheet"/>
 
 <style>
   html, body {
-    margin: 0; padding: 0; height: 100%;
-    overflow: hidden;
+    margin: 0;
+    padding: 0;
     background: black url(/images/colour-dark-grey-mz-vf.jpg) center center / cover no-repeat fixed;
+    overflow-x: hidden; /* no horizontal scrollbar */
   }
 
-  /* Nav bar */
+  /* Top bar (locked at top) */
   nav {
-    position: fixed; top: 0; left: 0;
-    width: 100%; height: 7vw;
-    display: flex; align-items: center;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 7vw;
+    display: flex;
+    align-items: center;
     backdrop-filter: blur(10px) saturate(200%) brightness(70%);
-    padding: 0 1%; z-index: 10;
+    padding: 0 1%;
+    z-index: 5;                   /* lower than the ad rail */
   }
-  nav img { width: 95px; height: auto; margin-right: 1%; border-radius: 1vw; }
-  nav h3 { font-size: 4vw; font-weight: 800; color: white; font-family: 'Montserrat', sans-serif; }
+  nav img {
+    width: 95px;
+    height: auto;
+    margin-right: 1%;
+    border-radius: 1vw;
+  }
+  nav h3 {
+    font-size: 4vw;
+    font-weight: 800;
+    color: white;
+    font-family: 'Montserrat', sans-serif;
+  }
 
-  /* Layout under nav — reserve space for floating ad */
+  /* Game section */
   .content {
-    position: fixed; top: 7vw; left: 0; right: 0; bottom: 0;
-    display: flex; gap: 20px; align-items: stretch;
-    padding: 0 16px 16px 16px; box-sizing: border-box;
-    margin-right: 300px; /* keep a 300px lane for the ad */
+    margin-top: 7vw;              /* offset for fixed nav bar */
+    padding: 2vh 16px 16px 16px;
+    box-sizing: border-box;
+    margin-right: 300px;          /* reserve space so game never goes under ad */
   }
-
-  /* Game area */
   .game-wrap {
+    position: relative;
     z-index: 2;
-    flex: 1 1 auto;
-    display: flex; align-items: stretch; justify-content: center;
-    min-width: 0; position: relative; background: #000;
-    border-radius: 8px; overflow: hidden;
+    width: 100%;
+    height: 96.5vh;               /* requested height */
+    border-radius: 8px;
+    overflow: hidden;
   }
-
-  /* Background image behind game */
   .game-wrap::before {
     content: "";
     position: absolute;
     inset: 0;
     background: url(/images/ubackground.png) center center / cover no-repeat;
     z-index: 0;
-    filter: none;
+  }
+  .game-wrap iframe {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    border: none;
+    border-radius: 8px;
+    background: transparent;
+    z-index: 1;
   }
 
-  #game_frame { width: 100%; height: 100%; position: relative; }
-
-  /* Unity container covers game area */
-  #unity-container { position: absolute; inset: 0; }
-  #unity-canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; outline: none; }
-
-  /* Loading UI */
-  #unity-loading-bar {
-    position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
-    width: 400px; height: 20px; background: rgba(0,0,0,.5);
-    border: 2px solid #fff; border-radius: 10px;
-  }
-  #unity-logo { position: absolute; top: calc(50% - 100px); left: 50%; transform: translateX(-50%); }
-  #unity-progress-bar-empty { width: 100%; height: 100%; position: relative; }
-  #unity-progress-bar-full {
-    position: absolute; top: 0; left: 0; width: 0%; height: 100%;
-    background: #4caf50; border-radius: 8px; transition: width .3s ease;
-  }
-  #unity-warning {
-    position: absolute; left: 50%; top: 5%; transform: translate(-50%);
-    background: white; padding: 10px; display: none;
-    border: 1px solid #ccc; border-radius: 5px; max-width: min(92vw, 600px);
-  }
-
-  /* Triple-click pointer-lock hint */
-  .tap-hint {
-    position: absolute; bottom: 12px; left: 0; right: 0;
-    text-align: center; color: rgba(255,255,255,.9);
-    font-size: 14px; font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
-    pointer-events: none; text-shadow: 0 1px 4px rgba(0,0,0,.6);
-    z-index: 4; display: none;
-  }
-
-  /* Floating right ad — out of .content and above nav */
-  .side-ad {
+  /* Right rail with sticky ad pinned to top */
+  .side-rail {
     position: fixed;
-    top: 0; right: 0;
-    width: 300px; height: 600px;
-    z-index: 9999;          /* above nav & game */
-    display: flex; align-items: center; justify-content: center;
-    border-radius: 8px; overflow: hidden;
-    backdrop-filter: blur(6px) saturate(140%) brightness(85%);
+    top: 0;
+    right: 0;
+    width: 300px;
+    height: 100vh;
+    display: flex;
+    align-items: flex-start;       /* keep ad at top */
+    justify-content: center;
+    pointer-events: none;          /* avoid blocking page interactions */
+    z-index: 99999;                /* ABOVE nav */
   }
-  .side-ad ins.adsbygoogle {
-    display: inline-block !important; width: 300px !important; height: 600px !important;
+  .side-ad {
+    position: sticky;
+    top: 0;
+    width: 300px;
+    height: 600px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+    backdrop-filter: blur(6px) saturate(140%) brightness(85%);
+    pointer-events: auto;          /* ad is clickable */
   }
 </style>
 
-<!-- GameMonetize SDK config (your code) -->
+<!-- Google Publisher Tag -->
+<script async crossorigin="anonymous" src="https://securepubads.g.doubleclick.net/tag/js/gpt.js"></script>
 <script>
-  window.SDK_OPTIONS = {
-    gameId: "jp112o3o4hzgrnc7zaewjkrfk282pul8",
-    onEvent: function (a) {
-      switch (a.name) {
-        case "SDK_GAME_PAUSE":
-          if (typeof myGameInstance !== 'undefined' && myGameInstance) {
-            myGameInstance.SendMessage('AudioManager', 'MuteAudio');
-          }
-          break;
-        case "SDK_GAME_START":
-          if (typeof myGameInstance !== 'undefined' && myGameInstance) {
-            myGameInstance.SendMessage('AudioManager', 'UnmuteAudio');
-          }
-          break;
-        case "SDK_READY":
-          break;
-      }
-    }
-  };
-  (function (d, t, id) {
-    var first = d.getElementsByTagName(t)[0];
-    if (!d.getElementById(id)) {
-      var s = d.createElement(t);
-      s.id = id;
-      s.src = "https://cdn.jsdelivr.net/gh/testamalame/sef@main/sedk.js";
-      first.parentNode.insertBefore(s, first);
-    }
-  })(document, "script", "gamemonetize-sdk");
-</script>
-
-<!-- Google Publisher Tag (GAM) -->
-<script async src="https://securepubads.g.doubleclick.net/tag/js/gpt.js"></script>
-<script>
-  // --- Refresh config (tweakable) ---
-  const SLOT_PATH   = '/23289777950/300x600';
-  const SLOT_SIZE   = [300, 600];
-  const SLOT_DIV_ID = 'div-gpt-ad-1757794050642-0';
-  const INTERVAL_MS = 30000;   // 30s
-  const MAX_REFRESH = 6;
-  const MIN_VIEW_MS = 5000;    // be viewable ~5s before refresh
-  // ----------------------------------
-
-  window.googletag = window.googletag || { cmd: [] };
-
+  window.googletag = window.googletag || {cmd: []};
   googletag.cmd.push(function() {
-    const slot = googletag.defineSlot(SLOT_PATH, SLOT_SIZE, SLOT_DIV_ID)
+    const railSlot = googletag.defineSlot('/23289777950/300x600', [300, 600], 'div-gpt-ad-1757794050642-0')
       .addService(googletag.pubads());
-
     googletag.pubads().enableSingleRequest();
-
-    // Gate on page visibility
-    let pageVisible = !document.hidden;
-    document.addEventListener('visibilitychange', () => { pageVisible = !document.hidden; });
-
-    // Viewability / in-view tracking
-    let inView = true;
-    let viewableSince = 0;
-
-    // Fires when 50%+ in view for ~1s
-    googletag.pubads().addEventListener('impressionViewable', (e) => {
-      if (e.slot === slot) {
-        inView = true;
-        viewableSince = performance.now();
-      }
-    });
-
-    // Attach IntersectionObserver after the div exists
-    function attachObserverWhenReady() {
-      const el = document.getElementById(SLOT_DIV_ID);
-      if (!el) { setTimeout(attachObserverWhenReady, 50); return; }
-      if ('IntersectionObserver' in window) {
-        const io = new IntersectionObserver((entries) => {
-          entries.forEach(entry => {
-            inView = entry.isIntersecting && entry.intersectionRatio >= 0.5;
-          });
-        }, { threshold: [0.5] });
-        io.observe(el);
-      } else {
-        inView = true;
-      }
-    }
-    attachObserverWhenReady();
-
-    // Start refresh cadence after the first creative loads
-    let refreshes = 0;
-    let timer = null;
-
-    googletag.pubads().addEventListener('slotOnload', (e) => {
-      if (e.slot !== slot || timer) return;
-      timer = setInterval(() => {
-        if (!pageVisible) return;
-        if (!inView) return;
-        if (refreshes >= MAX_REFRESH) return;
-        if (viewableSince && (performance.now() - viewableSince) < MIN_VIEW_MS) return;
-        googletag.pubads().refresh([slot]);
-        refreshes++;
-      }, INTERVAL_MS);
-    });
-
     googletag.enableServices();
+
+    // ---- Same 30s refresh logic (up to 6) with viewability gate ----
+    let refreshes = 0;
+    const MAX_REFRESHES = 6;
+    const INTERVAL_MS  = 30000;
+    let inView = false;
+
+    if ('IntersectionObserver' in window) {
+      const io = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          inView = entry.isIntersecting && entry.intersectionRatio >= 0.5;
+        });
+      }, { threshold: [0.5] });
+      const el = document.getElementById('div-gpt-ad-1757794050642-0');
+      if (el) io.observe(el);
+    } else {
+      inView = true;
+    }
+
+    setInterval(function () {
+      if (!inView) return;
+      if (refreshes >= MAX_REFRESHES) return;
+      googletag.pubads().refresh([railSlot], { changeCorrelator: false });
+      refreshes++;
+    }, INTERVAL_MS);
   });
 </script>
 </head>
-<body>
-<nav>
-  <a class="logo-link" data-href="/" style="cursor:pointer;">
-    <img alt="logo" src="/images/logo.png"/>
-  </a>
-  <script>
-    document.querySelectorAll('.logo-link').forEach(link => {
-      link.addEventListener('click', e => {
-        e.preventDefault(); // stops new tab or default <a> behavior
-        window.location.href = link.dataset.href; // always same tab
-      });
-    });
-  </script>
-  <h3>Granny 2</h3>
-</nav>
 
-<div class="content">
-  <!-- Game -->
-  <div class="game-wrap">
-    <div id="game_frame">
-      <div id="unity-container">
-        <canvas id="unity-canvas"></canvas>
-        <!-- Loading UI -->
-        <div id="unity-loading-bar">
-          <div id="unity-logo"></div>
-          <div id="unity-progress-bar-empty">
-            <div id="unity-progress-bar-full"></div>
-          </div>
-        </div>
-        <div id="unity-warning"></div>
-        <div class="tap-hint" id="tapHint"></div>
-      </div>
+<body>
+  <nav>
+    <a class="logo-link" data-href="/" style="cursor:pointer;">
+      <img alt="logo" src="/images/logo.png"/>
+    </a>
+    <h3>Granny 2</h3>
+  </nav>
+
+  <div class="content">
+    <div class="game-wrap">
+      <iframe sandbox="allow-scripts allow-same-origin" data-delayed-src="/storage/game.html">
+        <p>Your browser does not support iframes.</p>
+      </iframe>
     </div>
   </div>
-</div>
 
-<!-- Floating Right Vertical Ad (out of .content) -->
-<aside class="side-ad">
-  <!-- /23289777950/300x600 -->
-  <div id="div-gpt-ad-1757794050642-0" style="width:300px;height:600px;"></div>
+  <!-- Right rail pinned above everything -->
+  <div class="side-rail">
+    <aside class="side-ad">
+      <div id="div-gpt-ad-1757794050642-0" style="width:300px;height:600px;"></div>
+    </aside>
+  </div>
+
   <script>
-    // Ensure the slot div exists before display()
-    (function onReady(fn){
-      if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', fn);
-      } else { fn(); }
-    })(function(){
-      googletag = window.googletag || { cmd: [] };
-      googletag.cmd.push(function() {
-        googletag.display('div-gpt-ad-1757794050642-0');
+    // Logo click same tab
+    document.querySelectorAll('.logo-link').forEach(link => {
+      link.addEventListener('click', e => {
+        e.preventDefault();
+        window.location.href = link.dataset.href;
       });
     });
-  </script>
-</aside>
 
-<!-- Optional: guard against missing YaGames global -->
-<script>
-  (function maybeInitYandex() {
-    if (typeof YaGames !== 'undefined' && YaGames.init) {
-      YaGames.init().then(ysdk => {
-        window.ysdk = ysdk;
-        ysdk.getPlayer({ scopes: false }).then(p => { window.ysdkPlayer = p; });
-      }).catch(()=>{});
-    }
-  })();
-</script>
+    // Disable right-click
+    document.addEventListener("contextmenu", e => e.preventDefault());
 
-<script>
-  /* ===== Your original Granny 2 loader logic (UNCHANGED) ===== */
-  const container = document.querySelector("#unity-container");
-  const canvas = document.querySelector("#unity-canvas");
-  const loadingBar = document.querySelector("#unity-loading-bar");
-  const progressBarFull = document.querySelector("#unity-progress-bar-full");
-  const warningBanner = document.querySelector("#unity-warning");
-  const tapHint = document.getElementById("tapHint");
-
-  let myGameInstance = null;
-  let isAdShown = false;
-
-  function unityShowBanner(msg, type) {
-    function update() { warningBanner.style.display = warningBanner.children.length ? 'block' : 'none'; }
-    const div = document.createElement('div');
-    div.innerHTML = msg;
-    if (type === 'error') div.style = 'background:red;padding:10px;';
-    else if (type === 'warning') div.style = 'background:yellow;padding:10px;';
-    warningBanner.appendChild(div);
-    if (type !== 'error') setTimeout(() => { warningBanner.removeChild(div); update(); }, 5000);
-    update();
-  }
-
-  function showAdOnClick() {
-    try {
-      if (!isAdShown && typeof sdk !== 'undefined' && typeof sdk.showBanner === 'function') {
-        sdk.showBanner();
-        isAdShown = true;
+    // Delay game loading by 2 seconds
+    setTimeout(() => {
+      const gameIframe = document.querySelector('iframe[data-delayed-src]');
+      if (gameIframe) {
+        gameIframe.src = gameIframe.getAttribute('data-delayed-src');
       }
-    } catch (_) {}
-  }
-
-  // === Triple-click pointer-lock ===
-  let clickCount = 0;
-  function setupPointerLockTripleClick() {
-    tapHint.style.display = "block";
-    tapHint.textContent = "";
-
-    canvas.addEventListener('click', () => {
-      clickCount++;
-      if (clickCount === 1) {
-        tapHint.textContent = "";
-        showAdOnClick();
-      } else if (clickCount === 2) {
-        tapHint.textContent = "";
-      } else if (clickCount === 3) {
-        if (canvas.requestPointerLock) canvas.requestPointerLock();
-      }
-    });
-
-    document.addEventListener('pointerlockchange', () => {
-      const locked = document.pointerLockElement === canvas;
-      if (locked) {
-        tapHint.style.display = "none";
-      } else {
-        tapHint.style.display = "block";
-        tapHint.textContent = "";
-        clickCount = 0;
-      }
-    });
-  }
-
-  async function mergeFiles(parts, onProgress) {
-    let loaded = 0;
-    const total = parts.length;
-    const blobs = await Promise.all(parts.map(async (part) => {
-      const res = await fetch(part);
-      if (!res.ok) throw new Error("Failed to fetch " + part);
-      const blob = await res.blob();
-      loaded++;
-      if (onProgress) onProgress(loaded / total);
-      return blob;
-    }));
-    return URL.createObjectURL(new Blob(blobs));
-  }
-
-  async function initializeGame() {
-    const buildUrl  = "https://cdn.jsdelivr.net/gh/forms-docs-slides-glgl/ngng@main/Build";
-    const loaderUrl = buildUrl + "/Granny 2.loader.js";
-
-    const dataParts = [
-      buildUrl + "/Granny 2_part1.data",
-      buildUrl + "/Granny 2_part2.data",
-      buildUrl + "/Granny 2_part3.data"
-    ];
-    const wasmParts = [
-      buildUrl + "/Granny 2_part1.wasm",
-      buildUrl + "/Granny 2_part2.wasm"
-    ];
-
-    loadingBar.style.display = "block";
-
-    const dataUrl = await mergeFiles(dataParts, p => { progressBarFull.style.width = (50 * p) + "%"; });
-    const wasmUrl = await mergeFiles(wasmParts, p => { progressBarFull.style.width = (50 + 50 * p) + "%"; });
-
-    const config = {
-      dataUrl: dataUrl,
-      frameworkUrl: buildUrl + "/Granny 2.frameworkx.js",
-      codeUrl: wasmUrl,
-      streamingAssetsUrl: "StreamingAssets",
-      companyName: "Awesome",
-      productName: "Granny 2",
-      productVersion: "1.0",
-      showBanner: unityShowBanner,
-    };
-
-    const script = document.createElement("script");
-    script.src = loaderUrl;
-    script.onload = () => {
-      setTimeout(function() {
-      createUnityInstance(canvas, config, (progress) => {
-        progressBarFull.style.width = (100 * progress) + "%";
-      }).then((unityInstance) => {
-        myGameInstance = unityInstance;
-        setTimeout(() => { loadingBar.style.display = "none"; }, 500);
-        canvas.addEventListener('pointerdown', showAdOnClick, { once: true });
     }, 2000);
-        canvas.addEventListener('touchstart', showAdOnClick, { once: true });
-        setupPointerLockTripleClick();
-      }).catch((message) => {
-        alert(message);
-      });
-    };
-    document.body.appendChild(script);
-  }
 
-  initializeGame();
-
-  document.addEventListener("contextmenu", e => e.preventDefault());
-</script>
+    // Display the ad slot
+    window.googletag = window.googletag || {cmd: []};
+    googletag.cmd.push(() => { googletag.display('div-gpt-ad-1757794050642-0'); });
+  </script>
 </body>
 </html>

@@ -2,12 +2,31 @@
 <html lang="en">
 <head>
 <meta charset="utf-8"/>
-<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>NebulaPlay</title>
-<!-- Montserrat -->
-<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@800&display=swap" rel="stylesheet"/>
+
 <style>
-  /* Top bar */
+  html, body {
+    margin: 0;
+    padding: 0;
+    background: black url(/images/colour-dark-grey-mz-vf.jpg) center center / cover no-repeat fixed;
+    overflow-x: hidden; /* no horizontal scrollbar */
+  }
+
+  /* Top bar (locked at top) */
+  nav {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 7vw;
+    display: flex;
+    align-items: center;
+    backdrop-filter: blur(10px) saturate(200%) brightness(70%);
+    padding: 0 1%;
+    z-index: 5;                   /* lower than the ad rail */
+  }
   nav img {
     width: 95px;
     height: auto;
@@ -21,91 +40,66 @@
     font-family: 'Montserrat', sans-serif;
   }
 
-  /* Game container under the nav */
-  .game-wrap {
-    position: relative;        /* ensure proper stacking above background */
-    z-index: 2;                /* sits above any accidental layers */
-    flex: 1 1 auto;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    min-width: 0;
-    border-radius: 8px; /* matches child radius */
-    overflow: hidden;   /* keep bg neatly clipped to radius */
+  /* Game section */
+  .content {
+    margin-top: 7vw;              /* offset for fixed nav bar */
+    padding: 2vh 16px 16px 16px;
+    box-sizing: border-box;
+    margin-right: 300px;          /* reserve space so game never goes under ad */
   }
-
-  /* Background image behind iframe */
+  .game-wrap {
+    position: relative;
+    z-index: 2;
+    width: 100%;
+    height: 96.5vh;               /* requested height */
+    border-radius: 8px;
+    overflow: hidden;
+  }
   .game-wrap::before {
     content: "";
     position: absolute;
     inset: 0;
     background: url(/images/ubackground.png) center center / cover no-repeat;
-    z-index: 0;          /* below iframe */
-    filter: none;        /* adjust if you want dim/blur */
+    z-index: 0;
   }
   .game-wrap iframe {
-      position: relative;  /* above ::before */
-      width: 100%;
-      height: 100%;
-      border: none;
-      border-radius: 8px;
-      background: transparent; /* let background show through */
-      z-index: 1;
-    }
-
-  /* Floating right ad */
-  .side-ad {
-    position: fixed;
-    top: 0px;
-    right: 0;
-    width: 300px;
-    height: 600px;
-    z-index: 9999;
-    display: flex;
-    justify-content: center;
-    align-items: center;
+    position: relative;
+    width: 100%;
+    height: 100%;
+    border: none;
     border-radius: 8px;
-    overflow: hidden;
-    backdrop-filter: blur(6px) saturate(140%) brightness(85%);
+    background: transparent;
+    z-index: 1;
   }
 
-  .content {
-    position: fixed;
-    top: 7vw;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    display: flex;
-    align-items: stretch;
-    justify-content: center;
-    padding: 0 16px 16px 16px;
-    box-sizing: border-box;
-    margin-right: 300px; /* reserve space for ad (auto-adjusted in script) */
-  }
-
-  nav {
+  /* Right rail with sticky ad pinned to top */
+  .side-rail {
     position: fixed;
     top: 0;
-    left: 0;
-    width: 100%;
-    height: 7vw;
+    right: 0;
+    width: 300px;
+    height: 100vh;
     display: flex;
-    align-items: center;
-    backdrop-filter: blur(10px) saturate(200%) brightness(70%);
-    padding: 0 1%;
-    z-index: 10;
+    align-items: flex-start;       /* keep ad at top */
+    justify-content: center;
+    pointer-events: none;          /* avoid blocking page interactions */
+    z-index: 99999;                /* ABOVE nav */
   }
-
-  html, body {
-    margin: 0;
-    padding: 0;
-    height: 100%;
+  .side-ad {
+    position: sticky;
+    top: 0;
+    width: 300px;
+    height: 600px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
     overflow: hidden;
-    background: black url(/images/colour-dark-grey-mz-vf.jpg) center center / cover no-repeat fixed;
+    backdrop-filter: blur(6px) saturate(140%) brightness(85%);
+    pointer-events: auto;          /* ad is clickable */
   }
 </style>
 
-<!-- Google Publisher Tag (GAM) -->
+<!-- Google Publisher Tag -->
 <script async crossorigin="anonymous" src="https://securepubads.g.doubleclick.net/tag/js/gpt.js"></script>
 <script>
   window.googletag = window.googletag || {cmd: []};
@@ -115,6 +109,7 @@
     googletag.pubads().enableSingleRequest();
     googletag.enableServices();
 
+    // ---- Same 30s refresh logic (up to 6) with viewability gate ----
     let refreshes = 0;
     const MAX_REFRESHES = 6;
     const INTERVAL_MS  = 30000;
@@ -141,109 +136,53 @@
   });
 </script>
 </head>
+
 <body>
   <nav>
     <a class="logo-link" data-href="/" style="cursor:pointer;">
       <img alt="logo" src="/images/logo.png"/>
     </a>
-    <script>
-      document.querySelectorAll('.logo-link').forEach(link => {
-        link.addEventListener('click', e => {
-          e.preventDefault(); // stops new tab or default <a> behavior
-          window.location.href = link.dataset.href; // always same tab
-        });
-      });
-    </script>
     <h3>Pokémon Yellow</h3>
   </nav>
 
   <div class="content">
-    <!-- Game -->
     <div class="game-wrap">
-      <iframe
-        id="gameframe"
-        data-delayed-src="/storage/clpokeyellow.html"
-        tabindex="0"
-        sandbox="allow-scripts allow-same-origin allow-pointer-lock allow-forms allow-popups allow-modals"
-        allow="fullscreen; autoplay; clipboard-read; clipboard-write; gamepad; xr-spatial-tracking; picture-in-picture"
-      >
+      <iframe sandbox="allow-scripts allow-same-origin" data-delayed-src="/storage/clpokeyellow.html">
         <p>Your browser does not support iframes.</p>
       </iframe>
     </div>
-    <!-- Right Vertical Ad -->
+  </div>
+
+  <!-- Right rail pinned above everything -->
+  <div class="side-rail">
+    <aside class="side-ad">
+      <div id="div-gpt-ad-1757794050642-0" style="width:300px;height:600px;"></div>
+    </aside>
   </div>
 
   <script>
-    // Disable right-click
-    document.addEventListener("contextmenu", function(e) {
-      e.preventDefault();
+    // Logo click same tab
+    document.querySelectorAll('.logo-link').forEach(link => {
+      link.addEventListener('click', e => {
+        e.preventDefault();
+        window.location.href = link.dataset.href;
+      });
     });
-  </script>
 
-  <aside class="side-ad">
-    <!-- /23289777950/300x600 -->
-    <div id="div-gpt-ad-1757794050642-0" style="width:300px;height:600px;"></div>
-    <script>
-      googletag = window.googletag || {cmd: []};
-      googletag.cmd.push(function() {
-        googletag.display('div-gpt-ad-1757794050642-0');
-      });
-    </script>
-  </aside>
+    // Disable right-click
+    document.addEventListener("contextmenu", e => e.preventDefault());
 
-  <!-- Focus + layout guard -->
-  <script>
-    (function () {
-      const frame = document.getElementById('gameframe');
-      const content = document.querySelector('.content');
-      const sideAd = document.querySelector('.side-ad');
-      const AD_WIDTH = 300;              // matches .side-ad width
-      const MIN_PLAYABLE_WIDTH = 640;    // adjust if your game needs more/less
-
-      function resizeGuard() {
-        const available = window.innerWidth - AD_WIDTH;
-        if (available < MIN_PLAYABLE_WIDTH) {
-          // Stack layout so the ad won't overlay or steal interactions
-          content.style.marginRight = '0';
-          sideAd.style.position = 'static';
-        } else {
-          content.style.marginRight = AD_WIDTH + 'px';
-          sideAd.style.position = 'fixed';
-          sideAd.style.right = '0';
-          sideAd.style.top = '0px';
-        }
-      }
-
-      function focusFrame() {
-        try {
-          frame.focus();
-          // Some browsers transfer focus on a tick
-          setTimeout(() => frame.focus(), 0);
-        } catch (_) {}
-      }
-
-      // Try to focus as soon as the iframe is ready
-      frame.addEventListener('load', focusFrame);
-
-      // Also focus on user interactions with the game area
-      ['click', 'mousedown', 'mouseenter', 'touchstart'].forEach(evt => {
-        frame.addEventListener(evt, focusFrame, { passive: true });
-      });
-      document.querySelector('.game-wrap').addEventListener('click', focusFrame);
-
-      window.addEventListener('resize', resizeGuard);
-      resizeGuard();
-    })();
-  </script>
-
-  <script>
     // Delay game loading by 2 seconds
-    setTimeout(function() {
+    setTimeout(() => {
       const gameIframe = document.querySelector('iframe[data-delayed-src]');
       if (gameIframe) {
         gameIframe.src = gameIframe.getAttribute('data-delayed-src');
       }
     }, 2000);
+
+    // Display the ad slot
+    window.googletag = window.googletag || {cmd: []};
+    googletag.cmd.push(() => { googletag.display('div-gpt-ad-1757794050642-0'); });
   </script>
 </body>
 </html>

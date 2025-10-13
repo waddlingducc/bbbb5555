@@ -2,254 +2,187 @@
 <html lang="en">
 <head>
 <meta charset="utf-8"/>
-<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>NebulaPlay</title>
-
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@800&display=swap" rel="stylesheet"/>
 
 <style>
   html, body {
-    margin: 0; padding: 0; height: 100%;
-    overflow: hidden;
+    margin: 0;
+    padding: 0;
     background: black url(/images/colour-dark-grey-mz-vf.jpg) center center / cover no-repeat fixed;
+    overflow-x: hidden; /* no horizontal scrollbar */
   }
 
+  /* Top bar (locked at top) */
   nav {
-    position: fixed; top: 0; left: 0;
-    width: 100%; height: 7vw; min-height: 60px;
-    display: flex; align-items: center;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 7vw;
+    display: flex;
+    align-items: center;
     backdrop-filter: blur(10px) saturate(200%) brightness(70%);
-    padding: 0 1%; z-index: 10;
+    padding: 0 1%;
+    z-index: 5;                   /* lower than the ad rail */
   }
-  nav img { width: 95px; height: auto; margin-right: 1%; border-radius: 1vw; }
-  nav h3 { font-size: 4vw; font-weight: 800; color: white; font-family: 'Montserrat', sans-serif; }
+  nav img {
+    width: 95px;
+    height: auto;
+    margin-right: 1%;
+    border-radius: 1vw;
+  }
+  nav h3 {
+    font-size: 4vw;
+    font-weight: 800;
+    color: white;
+    font-family: 'Montserrat', sans-serif;
+  }
 
+  /* Game section */
   .content {
-    position: fixed; top: 7vw; left: 0; right: 0; bottom: 0;
-    display: flex; align-items: stretch; justify-content: center;
-    padding: 0 16px 16px 16px; box-sizing: border-box;
-    margin-right: 300px; /* reserve lane so game never runs under ad */
+    margin-top: 7vw;              /* offset for fixed nav bar */
+    padding: 2vh 16px 16px 16px;
+    box-sizing: border-box;
+    margin-right: 300px;          /* reserve space so game never goes under ad */
   }
-
   .game-wrap {
+    position: relative;
     z-index: 2;
-    flex: 1 1 auto;
-    display: flex; align-items: center; justify-content: center;
-    min-width: 0; position: relative;
-    background:#000; border-radius: 8px; overflow: hidden;
+    width: 100%;
+    height: 96.5vh;               /* requested height */
+    border-radius: 8px;
+    overflow: hidden;
   }
-
-  /* Background image behind game */
   .game-wrap::before {
     content: "";
     position: absolute;
     inset: 0;
     background: url(/images/ubackground.png) center center / cover no-repeat;
     z-index: 0;
-    filter: none;
+  }
+  .game-wrap iframe {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    border: none;
+    border-radius: 8px;
+    background: transparent;
+    z-index: 1;
   }
 
-
-  #game-frame {
-    position: relative; z-index: 1;
-    width: 100%; height: 100%; border: none;
-    border-radius: 8px; background: transparent;
+  /* Right rail with sticky ad pinned to top */
+  .side-rail {
+    position: fixed;
+    top: 0;
+    right: 0;
+    width: 300px;
+    height: 100vh;
+    display: flex;
+    align-items: flex-start;       /* keep ad at top */
+    justify-content: center;
+    pointer-events: none;          /* avoid blocking page interactions */
+    z-index: 99999;                /* ABOVE nav */
   }
-
-  /* Floating right ad (hovers over nav) */
   .side-ad {
-    position: fixed; top: 0; right: 0;
-    width: 300px; height: 600px;
-    z-index: 9999;
-    display: flex; justify-content: center; align-items: center;
-    border-radius: 8px; overflow: hidden;
+    position: sticky;
+    top: 0;
+    width: 300px;
+    height: 600px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
     backdrop-filter: blur(6px) saturate(140%) brightness(85%);
-  }
-  .side-ad ins.adsbygoogle {
-    display:inline-block !important;
-    width:300px !important; height:600px !important;
+    pointer-events: auto;          /* ad is clickable */
   }
 </style>
 
-<!-- Google Publisher Tag (GAM) -->
-<script async src="https://securepubads.g.doubleclick.net/tag/js/gpt.js"></script>
+<!-- Google Publisher Tag -->
+<script async crossorigin="anonymous" src="https://securepubads.g.doubleclick.net/tag/js/gpt.js"></script>
 <script>
-  // --- Refresh config (tweakable) ---
-  const SLOT_PATH   = '/23289777950/300x600';
-  const SLOT_SIZE   = [300, 600];
-  const SLOT_DIV_ID = 'div-gpt-ad-1757794050642-0';
-  const INTERVAL_MS = 30000;   // 30s
-  const MAX_REFRESH = 6;
-  const MIN_VIEW_MS = 5000;    // be viewable ~5s before refresh
-  // ----------------------------------
-
-  window.googletag = window.googletag || { cmd: [] };
-
+  window.googletag = window.googletag || {cmd: []};
   googletag.cmd.push(function() {
-    const slot = googletag.defineSlot(SLOT_PATH, SLOT_SIZE, SLOT_DIV_ID)
+    const railSlot = googletag.defineSlot('/23289777950/300x600', [300, 600], 'div-gpt-ad-1757794050642-0')
       .addService(googletag.pubads());
-
     googletag.pubads().enableSingleRequest();
-
-    // Gate on page visibility
-    let pageVisible = !document.hidden;
-    document.addEventListener('visibilitychange', () => { pageVisible = !document.hidden; });
-
-    // Viewability / in-view tracking
-    let inView = true;
-    let viewableSince = 0;
-
-    googletag.pubads().addEventListener('impressionViewable', (e) => {
-      if (e.slot === slot) {
-        inView = true;
-        viewableSince = performance.now();
-      }
-    });
-
-    function attachObserverWhenReady() {
-      const el = document.getElementById(SLOT_DIV_ID);
-      if (!el) { setTimeout(attachObserverWhenReady, 50); return; }
-      if ('IntersectionObserver' in window) {
-        const io = new IntersectionObserver((entries) => {
-          entries.forEach(entry => {
-            inView = entry.isIntersecting && entry.intersectionRatio >= 0.5;
-          });
-        }, { threshold: [0.5] });
-        io.observe(el);
-      } else {
-        inView = true;
-      }
-    }
-    attachObserverWhenReady();
-
-    let refreshes = 0;
-    let timer = null;
-
-    // Start refresh cadence after first creative loads
-    googletag.pubads().addEventListener('slotOnload', (e) => {
-      if (e.slot !== slot || timer) return;
-      timer = setInterval(() => {
-        if (!pageVisible) return;
-        if (!inView) return;
-        if (refreshes >= MAX_REFRESH) return;
-        if (viewableSince && (performance.now() - viewableSince) < MIN_VIEW_MS) return;
-        googletag.pubads().refresh([slot]);
-        refreshes++;
-      }, INTERVAL_MS);
-    });
-
     googletag.enableServices();
+
+    // ---- Same 30s refresh logic (up to 6) with viewability gate ----
+    let refreshes = 0;
+    const MAX_REFRESHES = 6;
+    const INTERVAL_MS  = 30000;
+    let inView = false;
+
+    if ('IntersectionObserver' in window) {
+      const io = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          inView = entry.isIntersecting && entry.intersectionRatio >= 0.5;
+        });
+      }, { threshold: [0.5] });
+      const el = document.getElementById('div-gpt-ad-1757794050642-0');
+      if (el) io.observe(el);
+    } else {
+      inView = true;
+    }
+
+    setInterval(function () {
+      if (!inView) return;
+      if (refreshes >= MAX_REFRESHES) return;
+      googletag.pubads().refresh([railSlot], { changeCorrelator: false });
+      refreshes++;
+    }, INTERVAL_MS);
   });
 </script>
-
 </head>
+
 <body>
-<!-- Nav -->
-<nav>
-  <a class="logo-link" data-href="/" style="cursor:pointer;">
-    <img alt="logo" src="/images/logo.png"/>
-  </a>
+  <nav>
+    <a class="logo-link" data-href="/" style="cursor:pointer;">
+      <img alt="logo" src="/images/logo.png"/>
+    </a>
+    <h3>Baldi's Basics</h3>
+  </nav>
+
+  <div class="content">
+    <div class="game-wrap">
+      <iframe sandbox="allow-scripts allow-same-origin" data-delayed-src="/storage/game.html">
+        <p>Your browser does not support iframes.</p>
+      </iframe>
+    </div>
+  </div>
+
+  <!-- Right rail pinned above everything -->
+  <div class="side-rail">
+    <aside class="side-ad">
+      <div id="div-gpt-ad-1757794050642-0" style="width:300px;height:600px;"></div>
+    </aside>
+  </div>
+
   <script>
+    // Logo click same tab
     document.querySelectorAll('.logo-link').forEach(link => {
       link.addEventListener('click', e => {
         e.preventDefault();
         window.location.href = link.dataset.href;
       });
     });
-  </script>
-  <h3>Baldi's Basics</h3>
-</nav>
 
-<!-- Content -->
-<div class="content">
-  <div class="game-wrap">
-    <!-- Same-origin iframe; we inject the Baldi loader with <base> -->
-    <iframe allow="fullscreen; autoplay; gamepad; pointer-lock" allowfullscreen id="game-frame"></iframe>
-  </div>
-</div>
+    // Disable right-click
+    document.addEventListener("contextmenu", e => e.preventDefault());
 
-<!-- Floating Ad -->
-<aside class="side-ad">
-  <!-- /23289777950/300x600 -->
-  <div id="div-gpt-ad-1757794050642-0" style="width:300px;height:600px;"></div>
-  <script>
-    // Ensure the slot div exists before display()
-    (function onReady(fn){
-      if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', fn);
-      } else { fn(); }
-    })(function(){
-      googletag = window.googletag || { cmd: [] };
-      googletag.cmd.push(function() {
-        googletag.display('div-gpt-ad-1757794050642-0');
-      });
-    });
-  </script>
-</aside>
-
-<script>
-  // Build the inner document with its own <base> for the Unity game
-  const BALDI_BASE = 'https://cdn.jsdelivr.net/gh/genizy/web-port@main/baldi-remaster/';
-  const inner = `
-<!DOCTYPE html><html lang="en-us"><head>
-  <base href="${BALDI_BASE}">
-  <meta charset="utf-8">
-  <style>
-    html,body{margin:0;height:100%;overflow:hidden;background:#231F20;}
-    #unity-canvas{width:100%;height:100%;display:block;image-rendering:pixelated;image-rendering:-moz-crisp-edges;}
-    #loading-text{position:absolute;top:16px;left:0;right:0;text-align:center;color:#fff;font-family:cursive;font-size:28px;text-shadow:0 2px 8px rgba(0,0,0,.6);}
-  </style>
-</head><body>
-  <div id="loading-text">LOADING...</div>
-  <canvas id="unity-canvas" tabindex="-1"></canvas>
-  <script src="Build/WebGL.loader.js"><\/script>
-  <script>
-    const loadingText=document.getElementById('loading-text');
-    let totalBytes=0,loadedBytes=0;
-    function fmt(b){if(b>1073741824)return(b/1073741824).toFixed(2)+' GB';if(b>1048576)return(b/1048576).toFixed(2)+' MB';if(b>1024)return(b/1024).toFixed(2)+' KB';return b+' B';}
-    async function headSize(u){try{const r=await fetch(u,{method:'HEAD'});return +(r.headers.get('Content-Length')||0);}catch{return 0;}}
-    async function fetchWithProgress(u){
-      const r=await fetch(u),rd=r.body.getReader();let rec=0,chunks=[];
-      while(true){const {done,value}=await rd.read();if(done)break;chunks.push(value);rec+=value.length;loadedBytes+=value.length;
-        if(loadingText&&totalBytes){loadingText.textContent='LOADING... '+fmt(loadedBytes)+' / '+fmt(totalBytes)+' ('+((loadedBytes/totalBytes*100).toFixed(1))+'%)';}
+    // Delay game loading by 2 seconds
+    setTimeout(() => {
+      const gameIframe = document.querySelector('iframe[data-delayed-src]');
+      if (gameIframe) {
+        gameIframe.src = gameIframe.getAttribute('data-delayed-src');
       }
-      const out=new Uint8Array(rec);let off=0;for(const c of chunks){out.set(c,off);off+=c.length;}return out.buffer;
-    }
-    async function merge(parts,mime){const bufs=await Promise.all(parts.map(fetchWithProgress));return URL.createObjectURL(new Blob(bufs,{type:mime}));}
-    function parts(root,n){return Array.from({length:n},(_,i)=>root+'.part'+(i+1));}
-    (async()=>{
-      const dataParts=parts('Build/WebGL.data',3), wasmParts=parts('Build/WebGL.wasm',3);
-      totalBytes=(await Promise.all([...dataParts,...wasmParts].map(headSize))).reduce((a,b)=>a+b,0);
-      const [dataUrl,wasmUrl]=await Promise.all([
-        merge(dataParts,'application/octet-stream'),
-        merge(wasmParts,'application/wasm')
-      ]);
-      const canvas=document.getElementById('unity-canvas');
-      createUnityInstance(canvas,{
-        dataUrl, frameworkUrl:'Build/WebGL.framework.js', codeUrl:wasmUrl,
-        streamingAssetsUrl:'StreamingAssets',
-        companyName:'Basically Games', productName:"Baldi\\'s Basics Classic Remastered", productVersion:'1.1',
-        devicePixelRatio:1, matchWebGLToCanvasSize:true,
-        webglContextAttributes:{antialias:false,alpha:false,preserveDrawingBuffer:false,powerPreference:'high-performance'}
-      }).then(()=>{if(loadingText)loadingText.remove();});
-      // pointer lock
-      const move=new Set(['KeyW','KeyA','KeyS','KeyD','Space','ShiftLeft','ShiftRight']);
-      let last=0,WIN=1200;
-      addEventListener('keydown',e=>{if(move.has(e.code))last=performance.now();},{capture:true});
-      function lock(el){(el.requestPointerLock||el.webkitRequestPointerLock||el.mozRequestPointerLock)?.call(el);}
-      function ok(e){if(e.button===1||e.button===2)return true;if(e.button===0)return performance.now()-last<=WIN;return false;}
-      canvas.addEventListener('pointerdown',e=>{if(ok(e))lock(canvas);},{capture:true});
-      canvas.addEventListener('contextmenu',e=>e.preventDefault());
-    })();
-  <\/script>
-</body></html>`;
+    }, 2000);
 
-  const frame = document.getElementById('game-frame');
-  setTimeout(function() {
-  const doc = frame.contentDocument || frame.contentWindow.document;
-  doc.open(); doc.write(inner); doc.close();
-  }, 2000);
-  frame.addEventListener('pointerdown', () => frame.focus(), {capture:true});
-</script>
+    // Display the ad slot
+    window.googletag = window.googletag || {cmd: []};
+    googletag.cmd.push(() => { googletag.display('div-gpt-ad-1757794050642-0'); });
+  </script>
 </body>
 </html>
