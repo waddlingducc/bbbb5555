@@ -8,10 +8,6 @@ packages = ["static-web-server"]
 [env]
 PORT = "5000"
 
-[run]
-# This is the new style: put the command inside the table
-command = ["static-web-server", "--root", ".", "--host", "0.0.0.0", "--port", "$PORT", "--spa", "index.html"]
-
 [[ports]]
 localPort = 5000
 externalPort = 5000
