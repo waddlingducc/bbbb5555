@@ -229,10 +229,6 @@
     <button><i class="fas fa-search"></i></button>
   </div>
 
-
-</body>
-</html>
-
   
     <div id="games">
         <a onclick="window.location.href='_/169/'" style="cursor:pointer;">
@@ -1127,7 +1123,138 @@ document.addEventListener("contextmenu", function(e){ e.preventDefault(); });
 
 
 
-<script src="script.js"></script>
+  <script>
+  // Extract game data and setup tracking BEFORE onclick is removed
+  (function() {
+    const gamesList = [];
+    
+    // Extract game data from the page
+    const gameLinks = document.querySelectorAll('#games a');
+    gameLinks.forEach(link => {
+      const img = link.querySelector('img');
+      const onclickAttr = link.getAttribute('onclick');
+      
+      if (img && onclickAttr) {
+        const match = onclickAttr.match(/['"](.*?)['"]/);
+        if (match && match[1]) {
+          let href = match[1];
+          // Ensure absolute path
+          if (!href.startsWith('/')) {
+            href = '/' + href;
+          }
+          
+          gamesList.push({
+            name: img.alt,
+            image: img.src,
+            url: href
+          });
+        }
+      }
+    });
+    
+    // Store games list globally
+    window.nebulaGames = gamesList;
+    
+    // Get recently played from localStorage
+    function getRecentlyPlayed() {
+      const recent = localStorage.getItem('recentlyPlayed');
+      return recent ? JSON.parse(recent) : [];
+    }
+    
+    // Add game to recently played
+    function addToRecentlyPlayed(gameUrl, gameName, gameImage) {
+      let recent = getRecentlyPlayed();
+      recent = recent.filter(g => g.url !== gameUrl);
+      recent.unshift({ url: gameUrl, name: gameName, image: gameImage });
+      recent = recent.slice(0, 5);
+      localStorage.setItem('recentlyPlayed', JSON.stringify(recent));
+    }
+    
+    // Get random games
+    function getRandomGames(count) {
+      const shuffled = [...gamesList].sort(() => 0.5 - Math.random());
+      return shuffled.slice(0, count);
+    }
+    
+    // Display recently played
+    function displayRecentlyPlayed() {
+      const container = document.getElementById('recently-played');
+      if (!container) return;
+      
+      const recent = getRecentlyPlayed();
+      if (recent.length === 0) {
+        container.innerHTML = '<p style="color: rgba(255,255,255,0.6); font-size: 16px;">No recently played games yet!</p>';
+        return;
+      }
+      
+      container.innerHTML = '';
+      recent.slice(0, 5).forEach(game => {
+        const link = document.createElement('a');
+        link.href = game.url;
+        link.onclick = (e) => {
+          e.preventDefault();
+          window.location.href = game.url;
+        };
+        link.style.cursor = 'pointer';
+        
+        const img = document.createElement('img');
+        img.src = game.image;
+        img.alt = game.name;
+        
+        link.appendChild(img);
+        container.appendChild(link);
+      });
+    }
+    
+    // Display random games
+    function displayRandomGames() {
+      const container = document.getElementById('random-games');
+      if (!container) return;
+      
+      const randomGames = getRandomGames(5);
+      container.innerHTML = '';
+      
+      randomGames.forEach(game => {
+        const link = document.createElement('a');
+        link.href = game.url;
+        link.onclick = (e) => {
+          e.preventDefault();
+          addToRecentlyPlayed(game.url, game.name, game.image);
+          window.location.href = game.url;
+        };
+        link.style.cursor = 'pointer';
+        
+        const img = document.createElement('img');
+        img.src = game.image;
+        img.alt = game.name;
+        
+        link.appendChild(img);
+        container.appendChild(link);
+      });
+    }
+    
+    // Setup click tracking on main games
+    gameLinks.forEach(link => {
+      const img = link.querySelector('img');
+      const onclickAttr = link.getAttribute('onclick');
+      
+      if (img && onclickAttr) {
+        link.addEventListener('click', () => {
+          const match = onclickAttr.match(/['"](.*?)['"]/);
+          if (match && match[1]) {
+            let url = match[1];
+            if (!url.startsWith('/')) url = '/' + url;
+            addToRecentlyPlayed(url, img.alt, img.src);
+          }
+        });
+      }
+    });
+    
+    // Initialize displays
+    displayRecentlyPlayed();
+    displayRandomGames();
+  })();
+  </script>
 
   <script>
   (function () {
@@ -1220,8 +1347,6 @@ document.addEventListener("contextmenu", function(e){ e.preventDefault(); });
   });
 })();
 </script>
-
-<script src="/script.js?v=3"></script>
 
 </body>
 </html>

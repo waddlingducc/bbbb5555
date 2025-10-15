@@ -18,6 +18,8 @@ Preferred communication style: Simple, everyday language.
 
 **Layout Structure**
 - Fixed navigation bar with backdrop blur effects
+- Recently Played section - displays last 5 games played (stored in localStorage)
+- Random Games section - shows 5 randomly selected games on each page load
 - Grid-based game display system
 - Search input for filtering games by title
 - Social media integration via fixed icon positions
@@ -55,6 +57,21 @@ Preferred communication style: Simple, everyday language.
 - Case-insensitive substring matching against alt text
 - Toggle visibility (display: block/none) based on search results
 - No server-side processing required
+
+### User Experience Features
+
+**Game Tracking**
+- Recently Played system using localStorage
+- Automatic tracking of clicked games
+- Displays last 5 games played with thumbnails
+- Click-through navigation to game pages
+- Persistent across browser sessions
+
+**Game Discovery**
+- Random Games section for content discovery
+- 5 randomly selected games on each page load
+- Direct click-to-play functionality
+- Games automatically added to Recently Played when clicked
 
 ### Advertising Integration
 
