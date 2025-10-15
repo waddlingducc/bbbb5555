@@ -6,6 +6,9 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
     <title>NebulaPlay</title>
     <link rel="icon" type="image/x-icon" href="/favicon.ico">
     <link rel="stylesheet" href="/main.css">
@@ -1170,13 +1173,18 @@ document.addEventListener("contextmenu", function(e){ e.preventDefault(); });
 
 <script>
 (function() {
+  function setAdsVisible(isVisible) {
+    document.querySelectorAll('.adsbygoogle').forEach(el => {
+      el.style.display = isVisible ? '' : 'none';
+    });
+  }
+
   document.addEventListener("DOMContentLoaded", function () {
-    const input = document.getElementById("search");
-    const games = document.getElementById("games");
-    if (!input || !games) return;
+    const searchInput = document.getElementById("search");
+    const gamesSection = document.getElementById("games");
+    if (!searchInput || !gamesSection) return;
 
-
-    const cards = Array.from(games.querySelectorAll("a")); 
+    const cards = Array.from(gamesSection.querySelectorAll("a")); 
     cards.forEach(card => {
       const title =
         card.dataset.title ||
@@ -1190,14 +1198,12 @@ document.addEventListener("contextmenu", function(e){ e.preventDefault(); });
       card.dataset.search = title.trim().toLowerCase(); 
     });
 
-
     function applySearch() {
-      const q = (input.value || "").trim().toLowerCase();
+      const q = (searchInput.value || "").trim().toLowerCase();
       const isSearching = q.length > 0;
 
-
-      games.classList.toggle("searching", isSearching);
-
+      setAdsVisible(!isSearching);
+      gamesSection.classList.toggle("searching", isSearching);
 
       cards.forEach(card => {
         const hay = card.dataset.search || "";
@@ -1208,82 +1214,14 @@ document.addEventListener("contextmenu", function(e){ e.preventDefault(); });
       if (isSearching) window.scrollTo({ top: 0, behavior: "instant" });
     }
 
-
-    input.addEventListener("input", applySearch);
+    searchInput.addEventListener("input", applySearch);
     const btn = document.querySelector(".search button");
     if (btn) btn.addEventListener("click", applySearch);
   });
 })();
 </script>
 
-<script>
-function setAdsVisible(isVisible) {
-  document.querySelectorAll('.adsbygoogle').forEach(el => {
-    el.style.display = isVisible ? '' : 'none';
-  });
-}
-</script>
-
-<script>
-(function () {
-  const input = document.querySelector('.search input');
-  if (!input) return;
-
-  // Any section that holds games (supports #games, .games, or custom via data attribute)
-  const sections = Array.from(document.querySelectorAll('#games, .games, [data-games-section]'));
-  if (sections.length === 0) return;
-
-  // Treat <a> tiles (your markup) plus common card classes if present
-  const tiles = sections.flatMap(sec => Array.from(
-    sec.querySelectorAll('a, .game, .game-card, [data-game-title]')
-  ));
-
-  // Precompute searchable text for each tile
-  tiles.forEach(tile => {
-    let text =
-      tile.dataset.gameTitle ||
-      tile.getAttribute('data-title') ||
-      tile.getAttribute('title') ||
-      tile.getAttribute('aria-label') ||
-      (tile.querySelector('h3, .title')?.textContent) ||
-      (tile.querySelector('img')?.alt) ||
-      tile.textContent ||
-      '';
-    tile.dataset.search = text.trim().toLowerCase();
-  });
-
-  
-
-  function filter() {
-    const q = (input.value || '').trim().toLowerCase();
-    const searching = q.length > 0;
-
-    setAdsVisible(!searching);
-
-    // Show/hide tiles
-    tiles.forEach(tile => {
-      const hay = tile.dataset.search || '';
-      tile.style.display = !searching || hay.includes(q) ? '' : 'none';
-    });
-
-    // Hide whole sections that have zero visible tiles during search
-    sections.forEach(sec => {
-      const secTiles = Array.from(
-        sec.querySelectorAll('a, .game, .game-card, [data-game-title]')
-      );
-      const anyVisible = secTiles.some(t => t.style.display !== 'none');
-      sec.style.display = !searching || anyVisible ? '' : 'none';
-    });
-
-    if (searching) window.scrollTo({ top: 0, behavior: 'instant' });
-  }
-
-  input.addEventListener('input', filter);
-  document.querySelector('.search button')?.addEventListener('click', filter);
-})();
-</script>
-
-<script src="/script.js"></script>
+<script src="/script.js?v=2"></script>
 
 </body>
 </html>
