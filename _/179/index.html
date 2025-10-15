@@ -23,7 +23,7 @@
     align-items: center;
     backdrop-filter: blur(10px) saturate(200%) brightness(70%);
     padding: 0 1%;
-    z-index: 10000;                /* fixed navbar always on top */
+    z-index: 10000; /* fixed navbar always on top */
   }
   nav img {
     width: 95px;
@@ -31,11 +31,29 @@
     margin-right: 1%;
     border-radius: 1vw;
   }
-  nav h3 {
+
+  .title-wrap {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .title-wrap h3 {
     font-size: 4vw;
     font-weight: 800;
     color: white;
     font-family: 'Montserrat', sans-serif;
+    margin: 0;
+  }
+
+  .title-wrap .note {
+    font-family: 'Montserrat', sans-serif;
+    color: white;
+    font-weight: 400;
+    font-size: 1.2vw;
+    opacity: 0.85;
+    margin-left: 40px; /* push further right */
+    line-height: 1.3em;
   }
 
   /* Game section */
@@ -43,7 +61,7 @@
     margin-top: 0;
     padding: 2vh 16px 16px 16px;
     box-sizing: border-box;
-    margin-right: 300px;          /* reserve space so game never goes under ad */
+    margin-right: 300px; /* reserve space so game never goes under ad */
   }
   .game-wrap {
     position: relative;
@@ -78,10 +96,10 @@
     width: 300px;
     height: 100vh;
     display: flex;
-    align-items: flex-start;       /* keep ad at top */
+    align-items: flex-start; /* keep ad at top */
     justify-content: center;
-    pointer-events: none;          /* avoid blocking page interactions */
-    z-index: 99999;                /* ABOVE nav */
+    pointer-events: none; /* avoid blocking page interactions */
+    z-index: 99999; /* ABOVE nav */
   }
   .side-ad {
     position: sticky;
@@ -93,7 +111,7 @@
     align-items: center;
     overflow: hidden;
     backdrop-filter: blur(6px) saturate(140%) brightness(85%);
-    pointer-events: auto;          /* ad is clickable */
+    pointer-events: auto; /* ad is clickable */
   }
 </style>
 
@@ -140,7 +158,10 @@
     <a class="logo-link" data-href="/" style="cursor:pointer;">
       <img alt="logo" src="/images/logo.png"/>
     </a>
-    <h3>Pokémon HeartGold</h3>
+    <div class="title-wrap">
+      <h3>Pokémon HeartGold</h3>
+      <span class="note">(Click the controller icon,<br>then reset for keybinds.)</span>
+    </div>
   </nav>
 
   <div class="content">
