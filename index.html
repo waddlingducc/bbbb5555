@@ -1187,11 +1187,14 @@ document.addEventListener("contextmenu", function(e){ e.preventDefault(); });
             href = '/' + href;
           }
           
-          gamesList.push({
-            name: img.alt,
-            image: img.src,
-            url: href
-          });
+          // Exclude _/169/ from sections
+          if (!href.includes('_/169/')) {
+            gamesList.push({
+              name: img.alt,
+              image: img.src,
+              url: href
+            });
+          }
         }
       }
     });
@@ -1207,6 +1210,9 @@ document.addEventListener("contextmenu", function(e){ e.preventDefault(); });
     
     // Add game to recently played
     function addToRecentlyPlayed(gameUrl, gameName, gameImage) {
+      // Don't add _/169/ to recently played
+      if (gameUrl.includes('_/169/')) return;
+      
       let recent = getRecentlyPlayed();
       recent = recent.filter(g => g.url !== gameUrl);
       recent.unshift({ url: gameUrl, name: gameName, image: gameImage });
