@@ -1169,49 +1169,51 @@ document.addEventListener("contextmenu", function(e){ e.preventDefault(); });
 
 
 <script>
-document.addEventListener("DOMContentLoaded", function () {
-  const input = document.getElementById("search");
-  const games = document.getElementById("games");
-  if (!input || !games) return;
+(function() {
+  document.addEventListener("DOMContentLoaded", function () {
+    const input = document.getElementById("search");
+    const games = document.getElementById("games");
+    if (!input || !games) return;
 
 
-  const cards = Array.from(games.querySelectorAll("a")); 
-  cards.forEach(card => {
-    const title =
-      card.dataset.title ||
-      card.getAttribute("title") ||
-      card.getAttribute("aria-label") ||
-      (card.querySelector("h3") && card.querySelector("h3").textContent) ||
-      (card.querySelector("img") && card.querySelector("img").alt) ||
-      card.textContent ||
-      "";
-
-    card.dataset.search = title.trim().toLowerCase(); 
-  });
-
-
-  function applySearch() {
-    const q = (input.value || "").trim().toLowerCase();
-    const isSearching = q.length > 0;
-
-
-    games.classList.toggle("searching", isSearching);
-
-
+    const cards = Array.from(games.querySelectorAll("a")); 
     cards.forEach(card => {
-      const hay = card.dataset.search || "";
-      const match = !isSearching || hay.includes(q);
-      card.style.display = match ? "" : "none";
+      const title =
+        card.dataset.title ||
+        card.getAttribute("title") ||
+        card.getAttribute("aria-label") ||
+        (card.querySelector("h3") && card.querySelector("h3").textContent) ||
+        (card.querySelector("img") && card.querySelector("img").alt) ||
+        card.textContent ||
+        "";
+
+      card.dataset.search = title.trim().toLowerCase(); 
     });
 
-    if (isSearching) window.scrollTo({ top: 0, behavior: "instant" });
-  }
+
+    function applySearch() {
+      const q = (input.value || "").trim().toLowerCase();
+      const isSearching = q.length > 0;
 
 
-  input.addEventListener("input", applySearch);
-  const btn = document.querySelector(".search button");
-  if (btn) btn.addEventListener("click", applySearch);
-});
+      games.classList.toggle("searching", isSearching);
+
+
+      cards.forEach(card => {
+        const hay = card.dataset.search || "";
+        const match = !isSearching || hay.includes(q);
+        card.style.display = match ? "" : "none";
+      });
+
+      if (isSearching) window.scrollTo({ top: 0, behavior: "instant" });
+    }
+
+
+    input.addEventListener("input", applySearch);
+    const btn = document.querySelector(".search button");
+    if (btn) btn.addEventListener("click", applySearch);
+  });
+})();
 </script>
 
 <script>
