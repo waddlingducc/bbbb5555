@@ -1220,15 +1220,46 @@ document.addEventListener("contextmenu", function(e){ e.preventDefault(); });
       localStorage.setItem('recentlyPlayed', JSON.stringify(recent));
     }
     
-    // Get random games using Fisher-Yates shuffle for better randomization
+    // Get recently shown random games from localStorage
+    function getRecentlyShownRandom() {
+      const recent = localStorage.getItem('recentlyShownRandom');
+      return recent ? JSON.parse(recent) : [];
+    }
+    
+    // Update recently shown random games
+    function updateRecentlyShownRandom(gameUrls) {
+      let recent = getRecentlyShownRandom();
+      recent.push(...gameUrls);
+      // Keep only last 25 shown games to ensure good variety
+      recent = recent.slice(-25);
+      localStorage.setItem('recentlyShownRandom', JSON.stringify(recent));
+    }
+    
+    // Get random games using Fisher-Yates shuffle with exclusion of recently shown
     function getRandomGames(count) {
-      const shuffled = [...gamesList];
-      // Fisher-Yates shuffle algorithm
-      for (let i = shuffled.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+      const recentlyShown = getRecentlyShownRandom();
+      
+      // Filter out recently shown games
+      let availableGames = gamesList.filter(game => !recentlyShown.includes(game.url));
+      
+      // If we don't have enough games, reset the exclusion list and use full pool
+      if (availableGames.length < count) {
+        availableGames = [...gamesList];
+        localStorage.removeItem('recentlyShownRandom');
       }
-      return shuffled.slice(0, count);
+      
+      // Fisher-Yates shuffle algorithm
+      for (let i = availableGames.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [availableGames[i], availableGames[j]] = [availableGames[j], availableGames[i]];
+      }
+      
+      const selected = availableGames.slice(0, count);
+      
+      // Remember these games so we don't show them again soon
+      updateRecentlyShownRandom(selected.map(g => g.url));
+      
+      return selected;
     }
     
     // Display recently played
