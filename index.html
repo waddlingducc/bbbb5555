@@ -1230,8 +1230,8 @@ document.addEventListener("contextmenu", function(e){ e.preventDefault(); });
     function updateRecentlyShownRandom(gameUrls) {
       let recent = getRecentlyShownRandom();
       recent.push(...gameUrls);
-      // Keep only last 25 shown games to ensure good variety
-      recent = recent.slice(-25);
+      // Keep only last 50 shown games to ensure good variety (10 page loads)
+      recent = recent.slice(-50);
       localStorage.setItem('recentlyShownRandom', JSON.stringify(recent));
     }
     
