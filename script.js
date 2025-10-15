@@ -59,9 +59,13 @@
     }
     
     container.innerHTML = '';
-    recent.forEach(game => {
+    // Display up to 5 most recent games
+    const gamesToShow = recent.slice(0, 5);
+    gamesToShow.forEach(game => {
       const link = document.createElement('a');
-      link.onclick = () => {
+      link.href = game.url;
+      link.onclick = (e) => {
+        e.preventDefault();
         window.location.href = game.url;
       };
       link.style.cursor = 'pointer';
@@ -85,7 +89,9 @@
     container.innerHTML = '';
     randomGames.forEach(game => {
       const link = document.createElement('a');
-      link.onclick = () => {
+      link.href = game.url;
+      link.onclick = (e) => {
+        e.preventDefault();
         addToRecentlyPlayed(game.url, game.name, game.image);
         window.location.href = game.url;
       };
