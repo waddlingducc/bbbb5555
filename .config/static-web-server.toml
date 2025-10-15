@@ -1,0 +1,12 @@
+# .config/static-web-server.toml
+[general]
+root = "."
+host = "0.0.0.0"
+port = "$PORT"
+
+# Send index.html for unknown routes (SPA behavior)
+spa = true
+
+# Optional niceties:
+# cache-control-headers = "public, max-age=0, must-revalidate"
+# directory-listing = false
